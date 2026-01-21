@@ -247,7 +247,7 @@ Depending on your use case, consider:
 
 2. **Security Scans**
    ```bash
-   # Python
+   # Python - Check for known vulnerabilities
    pip install safety
    safety check
    
@@ -258,6 +258,10 @@ Depending on your use case, consider:
    # Docker
    docker scan windows-installer-backend
    ```
+
+   **Note**: Current dependencies use patched versions:
+   - `fastapi==0.109.1` (fixes ReDoS vulnerability, CVE addressed)
+   - `python-multipart==0.0.18` (fixes DoS and ReDoS vulnerabilities)
 
 3. **Review Logs**
    - Check for suspicious activity
