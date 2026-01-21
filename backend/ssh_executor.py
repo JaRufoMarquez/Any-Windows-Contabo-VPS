@@ -13,11 +13,13 @@ logger = logging.getLogger(__name__)
 class SSHExecutor:
     """Execute commands remotely via SSH without uploading scripts"""
     
-    def __init__(self, host: str, username: str, password: str, port: int = 22):
+    def __init__(self, host: str, username: str, password: str, port: int = 22, 
+                 auto_add_host_keys: bool = True):
         self.host = host
         self.username = username
         self.password = password
         self.port = port
+        self.auto_add_host_keys = auto_add_host_keys
         self.client: Optional[paramiko.SSHClient] = None
         self.connected = False
     
@@ -25,10 +27,17 @@ class SSHExecutor:
         """Establish SSH connection"""
         try:
             self.client = paramiko.SSHClient()
-            # Note: Using AutoAddPolicy for convenience in rescue system scenarios
-            # where host keys may change frequently. In production, consider using
-            # a more restrictive policy or validating host keys explicitly.
-            self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            
+            if self.auto_add_host_keys:
+                # Note: Using AutoAddPolicy for convenience in rescue system scenarios
+                # where host keys may change frequently. In production, consider using
+                # a more restrictive policy or validating host keys explicitly.
+                self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            else:
+                # Reject unknown hosts (more secure but requires known_hosts)
+                self.client.load_system_host_keys()
+                self.client.set_missing_host_key_policy(paramiko.RejectPolicy())
+            
             self.client.connect(
                 self.host,
                 port=self.port,

@@ -251,11 +251,21 @@ class WorkflowEngine:
     
     def _step_partition_disk(self):
         """Create partitions on disk"""
-        # Get disk size
+        # Get disk size (extract numeric value without units)
         disk_size_output = self.ssh.get_command_output(
-            "parted /dev/sda --script print | awk '/^Disk \\/dev\\/sda:/ {print int($3)}'"
+            "parted /dev/sda --script print | awk '/^Disk \\/dev\\/sda:/ {gsub(/[^0-9]/, \"\", $3); print $3}'"
         )
-        disk_size_gb = int(disk_size_output)
+        try:
+            disk_size_gb = int(disk_size_output)
+        except ValueError:
+            # Fallback: try to extract just the numeric part
+            import re
+            match = re.search(r'(\d+)', disk_size_output)
+            if match:
+                disk_size_gb = int(match.group(1))
+            else:
+                raise Exception(f"Could not parse disk size from: {disk_size_output}")
+        
         disk_size_mb = disk_size_gb * 1024
         part_size_mb = disk_size_mb // 2
         
@@ -270,10 +280,15 @@ class WorkflowEngine:
             f"parted /dev/sda --script -- mkpart primary ntfs {part_size_mb}MB 100%"
         )
         
-        # Inform kernel and wait
-        for i in range(3):
+        # Inform kernel and wait for partition table changes to propagate
+        # Multiple retries with delays are necessary as the kernel needs time
+        # to recognize the new partition table and create device nodes
+        PARTITION_PROBE_RETRIES = 3
+        PARTITION_PROBE_DELAY = 60  # seconds
+        
+        for i in range(PARTITION_PROBE_RETRIES):
             self.ssh.execute_command("partprobe /dev/sda")
-            time.sleep(60)
+            time.sleep(PARTITION_PROBE_DELAY)
         
         # Verify partitions
         exit_code, _, _ = self.ssh.execute_command("lsblk /dev/sda1 && lsblk /dev/sda2")

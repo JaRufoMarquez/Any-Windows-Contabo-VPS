@@ -136,8 +136,11 @@ const PromptDialog = ({ prompt, onSubmit }) => {
               <p className="text-sm text-blue-800 mt-2">
                 Example SCP command:
                 <code className="block mt-1 p-2 bg-white rounded text-xs">
-                  scp /path/to/file.iso root@{'{your-vps-ip}'}:/root/windisk/
+                  scp /path/to/file.iso root@{'{'}IP{'}'}:/root/windisk/
                 </code>
+              </p>
+              <p className="text-sm text-gray-600 mt-1 italic">
+                Replace IP with your VPS IP address
               </p>
             </div>
             <button
