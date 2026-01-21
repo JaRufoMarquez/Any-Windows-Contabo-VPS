@@ -108,6 +108,10 @@ Then open `http://localhost:3000` in your browser.
    - **SSH Port:** `22` (default)
 3. Click **"Connect & Start Installation"**
 
+![Web Installer Connection Form](https://github.com/user-attachments/assets/96805f23-eeb0-4fcb-ac7b-60b558884ffd)
+
+*The modern web interface makes it easy to connect to your VPS*
+
 #### Step 4: Follow Interactive Prompts
 
 The installer will guide you through each step with clear prompts:
@@ -163,6 +167,7 @@ The web installer performs the following operations remotely via SSH:
 - **Connection validation** - the app validates SSH connectivity before starting
 - **No script upload** - all commands executed remotely, no files uploaded to VPS
 - **Read-only to .sh file** - the original script is never executed on the VPS
+- **Host key validation** - Uses SSH AutoAddPolicy for rescue system scenarios where host keys may change; in production deployments, consider implementing stricter host key validation
 
 ---
 

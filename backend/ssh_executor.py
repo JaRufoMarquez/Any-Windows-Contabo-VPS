@@ -25,6 +25,9 @@ class SSHExecutor:
         """Establish SSH connection"""
         try:
             self.client = paramiko.SSHClient()
+            # Note: Using AutoAddPolicy for convenience in rescue system scenarios
+            # where host keys may change frequently. In production, consider using
+            # a more restrictive policy or validating host keys explicitly.
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.client.connect(
                 self.host,
