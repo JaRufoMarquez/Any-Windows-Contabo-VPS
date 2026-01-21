@@ -138,11 +138,11 @@ The web installer performs the exact same operations as the manual script:
 ### Screenshots
 
 <div align="center">
-  <img src="docs/screenshots/web-installer-home.png" alt="Web Installer Home" width="45%">
-  <img src="docs/screenshots/web-installer-progress.png" alt="Installation Progress" width="45%">
+  <img src="https://github.com/user-attachments/assets/d2035d87-deb4-49c7-97f9-d6e2512bb830" alt="Web Installer Home - English" width="45%">
+  <img src="https://github.com/user-attachments/assets/47216c9f-c8e9-44fb-9ac4-a17ce0d14e4e" alt="Web Installer Home - Spanish" width="45%">
 </div>
 
-*Modern bilingual interface with real-time progress tracking*
+*Modern bilingual interface (English & Spanish) with real-time progress tracking*
 
 ---
 
@@ -398,11 +398,11 @@ El instalador web realiza exactamente las mismas operaciones que el script manua
 ### Capturas de Pantalla
 
 <div align="center">
-  <img src="docs/screenshots/web-installer-home.png" alt="Inicio del Instalador Web" width="45%">
-  <img src="docs/screenshots/web-installer-progress.png" alt="Progreso de Instalación" width="45%">
+  <img src="https://github.com/user-attachments/assets/d2035d87-deb4-49c7-97f9-d6e2512bb830" alt="Inicio del Instalador Web - Inglés" width="45%">
+  <img src="https://github.com/user-attachments/assets/47216c9f-c8e9-44fb-9ac4-a17ce0d14e4e" alt="Inicio del Instalador Web - Español" width="45%">
 </div>
 
-*Interfaz moderna bilingüe con seguimiento de progreso en tiempo real*
+*Interfaz moderna bilingüe (Inglés y Español) con seguimiento de progreso en tiempo real*
 
 ---
 
