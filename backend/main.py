@@ -7,9 +7,13 @@ import threading
 import time
 import re
 import uuid
+import os
 from enum import Enum
 
 app = FastAPI(title="Windows VPS Installer")
+
+# Configuration
+STRICT_HOST_KEY_CHECKING = os.getenv("STRICT_HOST_KEY_CHECKING", "false").lower() == "true"
 
 # CORS middleware
 app.add_middleware(
@@ -21,6 +25,12 @@ app.add_middleware(
 )
 
 # Job storage (in-memory)
+# NOTE: Jobs are stored in memory only for security (no password persistence)
+# This means all job state is lost on application restart
+# For production use with job history requirements, consider:
+# 1. Persistent storage (database) with encrypted sensitive data
+# 2. Separate storage for job logs vs credentials
+# 3. Automatic cleanup of old job data
 jobs: Dict[str, Dict[str, Any]] = {}
 
 
@@ -93,7 +103,24 @@ def run_installation_workflow(job_id: str, credentials: VPSCredentials):
         # Initialize SSH connection
         update_step_status(job_id, 0, StepStatus.RUNNING)
         ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
+        # Host key policy configuration
+        # For production with known hosts, set STRICT_HOST_KEY_CHECKING=true
+        if STRICT_HOST_KEY_CHECKING:
+            ssh.load_system_host_keys()
+            ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
+        else:
+            # NOTE: AutoAddPolicy is used for convenience in rescue system scenarios
+            # where the host key changes frequently. For production use, consider:
+            # 1. Using known_hosts file with specific host keys
+            # 2. Implementing host key verification
+            # 3. Using certificate-based authentication
+            # This is acceptable here because:
+            # - VPS is in rescue mode (temporary environment)
+            # - User explicitly provides credentials
+            # - Connection is user-initiated and short-lived
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
         ssh.connect(
             hostname=credentials.host,
             username=credentials.username,
@@ -158,10 +185,16 @@ def run_installation_workflow(job_id: str, credentials: VPSCredentials):
         
         # Get disk size and calculate partition size
         stdout, stderr, code = execute_ssh_command(ssh, "parted /dev/sda --script print | awk '/^Disk \\/dev\\/sda:/ {print int($3)}'")
-        if code != 0:
+        if code != 0 or not stdout.strip():
             raise Exception(f"Failed to get disk size: {stderr}")
         
-        disk_size_gb = int(stdout.strip()) if stdout.strip().isdigit() else 200
+        try:
+            disk_size_gb = int(stdout.strip())
+            if disk_size_gb < 50:
+                raise Exception(f"Disk size too small: {disk_size_gb}GB (minimum 50GB required)")
+        except ValueError:
+            raise Exception(f"Invalid disk size value: {stdout.strip()}")
+        
         disk_size_mb = disk_size_gb * 1024
         part_size_mb = disk_size_mb // 2
         

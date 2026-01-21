@@ -40,6 +40,9 @@ npm run build  # Production build
 ### Backend
 - `HOST`: Backend host (default: 0.0.0.0)
 - `PORT`: Backend port (default: 8000)
+- `STRICT_HOST_KEY_CHECKING`: Enable strict SSH host key checking (default: false)
+  - Set to `true` for production environments with known hosts
+  - When `true`, requires proper known_hosts file configuration
 
 ### Frontend
 - `VITE_API_URL`: Backend API URL (default: /api)

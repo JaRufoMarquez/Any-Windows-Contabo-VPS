@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Configuration constants
+const DEFAULT_WINDOWS_ISO_URL = 'https://bit.ly/3UGzNcB';
+const DEFAULT_VIRTIO_ISO_URL = 'https://bit.ly/4d1g7Ht';
+const POLL_INTERVAL_MS = 2000;
+
 const translations = {
   en: {
     title: 'Windows VPS Installer',
@@ -155,10 +160,15 @@ function App() {
         try {
           const response = await axios.get(`/api/jobs/${jobId}`);
           setJobStatus(response.data);
+          
+          // Stop polling if job is in terminal state
+          if (response.data.status === 'completed' || response.data.status === 'failed') {
+            clearInterval(interval);
+          }
         } catch (err) {
           console.error('Error fetching job status:', err);
         }
-      }, 2000);
+      }, POLL_INTERVAL_MS);
       return () => clearInterval(interval);
     }
   }, [jobId]);
@@ -272,7 +282,7 @@ function App() {
     }
 
     if (waitingFor === 'windows_iso_url' || waitingFor === 'virtio_iso_url') {
-      const defaultUrl = waitingFor === 'windows_iso_url' ? 'https://bit.ly/3UGzNcB' : 'https://bit.ly/4d1g7Ht';
+      const defaultUrl = waitingFor === 'windows_iso_url' ? DEFAULT_WINDOWS_ISO_URL : DEFAULT_VIRTIO_ISO_URL;
       return (
         <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mt-4">
           <h3 className="text-xl font-bold text-blue-800 mb-2">{t.isoDownload.urlPrompt}</h3>
